@@ -1,5 +1,6 @@
-import sys, pygame
+import pygame
 from Map import Map
+from InputManager import InputManager
 
 pygame.init()
 
@@ -12,43 +13,23 @@ pygame.display.set_caption("Wordle")
 
 new_map = Map(background_color, rectangle_color, screen)
 
-#Text input config
-base_font = pygame.font.SysFont(None, 80)
-user_text = ''
-input_rect = pygame.Rect(65, 60, 100, 100)
-active = False
+new_map.build() #Builds the map
+
+new_inputManager = InputManager(new_map.get_coordinates())
 
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+    new_map.build()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if input_rect.collidepoint(event.pos):
-                active = True
-            else:
-                active = False
-  
-        if event.type == pygame.KEYDOWN:
-  
-            # Check for backspace
-            if event.key == pygame.K_BACKSPACE:
-  
-                # get text input from 0 to -1 i.e. end.
-                user_text = user_text[:-1]
-  
-            # Unicode standard is used for string
-            # formation
-            else:
-                user_text += event.unicode
+    new_inputManager.check_events()
 
-    new_map.build() #Builds the map
+    i = 0
 
-    text_surface = base_font.render(user_text, True, (0, 0, 0))
-
-    screen.blit(text_surface, (input_rect.x+5, input_rect.y+5))
-
-    input_rect.w = max(100, text_surface.get_width()+10)
-
+    for coord in new_inputManager.get_rects():
+        input_rect = pygame.Rect(coord[0], coord[1], 100, 100)
+        text_surface = new_inputManager.get_base_font().render(new_inputManager.get_user_letter(i), True, (0, 0, 0))
+        screen.blit(text_surface, (input_rect.x+5, input_rect.y+5))
+        input_rect.w = max(100, text_surface.get_width()+10)
+        i += 1
     pygame.display.flip()
 
 
